@@ -54,6 +54,12 @@ Entropy
 Entropy is a particularly difficult thing to have confidence in. If desired, a user should always be able to directly seed a given function with their own source of entropy. This may be a series of dice rolls, a passphrase, button mashing, or ideally anything the user has decided to trust. This will undoubtedly introduce usability issues as few people will want to roll a die 100 times and then enter the results into a computer by hand. The Raspberry Pi's BCM2835 SoC includes a hardware random number generator. It is up to the user to decide if this is trustworthy enough to use on a case-by-case basis, but it should be an option if present.
 
 
+Persistence
+-----------
+
+Except in the case of special usability needs, bitprinter should never store anything to disk. All data that needs to persist after shutdown should be saved by printing. Bitprinter should boot up and shutdown extremely quickly and without any user intervention in order to encourage leaving it turned off while it is not in use. The entire contents of memory should be wiped during each shutdown to protect against cold-boot attacks.
+
+
 Auditing
 --------
 

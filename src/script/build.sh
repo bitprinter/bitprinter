@@ -78,11 +78,11 @@ chroot rootfs/ /usr/bin/passwd
 rm rootfs/usr/bin/qemu-arm-static
 
 # Copy over pre-compiled modules for Raspberry Pi
-cp -R "$FIRMWARE_DIR/modules/*" rootfs/lib/modules/
+cp -R "$FIRMWARE_DIR"/modules/* rootfs/lib/modules/
 
 # Set up our boot fs -- this includes a pre-compiled kernel
 mkdir -p bootfs
-cp -R "$FIRMWARE_DIR/boot/*" bootfs/
+cp -R "$FIRMWARE_DIR"/boot/* bootfs/
 
 
 ## Create empty image
@@ -140,8 +140,8 @@ mount "$ROOTP" mnt
 mount "$BOOTP" mnt/boot
 
 # Copy the output of debootstrap into the image
-cp -r "$DEBOOTSTRAP_DIR/rootfs/*" mnt/
-cp -r "$DEBOOTSTRAP_DIR/bootfs/*" mnt/boot/
+cp -r "$DEBOOTSTRAP_DIR"/rootfs/* mnt/
+cp -r "$DEBOOTSTRAP_DIR"/bootfs/* mnt/boot/
 
 
 ## Unmount

@@ -33,15 +33,11 @@ echo "Building into: $BUILD_DIR/$IMAGE"
 # Ensure build dir
 mkdir -p "$BUILD_DIR"
 
+## Bootstrap stage 1
+
 # Clean any old debootstrap dir
 rm -rf "$DEBOOTSTRAP_DIR"
 mkdir "$DEBOOTSTRAP_DIR"
-
-
-# Bootstrap stage 1
-
-# Move to our debootstrap working dir
-cd "$DEBOOTSTRAP_DIR"
 
 # Bootstrap the initial system
 debootstrap \
@@ -97,9 +93,10 @@ dd if=/dev/zero of="$IMAGE" bs=1M count=1000
 ## Format disk
 
 # Setup and store the location of our image
-DEVICE=`sudo losetup -f --show "$IMAGE"`
+DEVICE=`losetup -f --show "$IMAGE"`
 
-# Format the new disk
+# Format the new disk (ignore errors only in fdisk)
+set +e
 fdisk "$DEVICE" << EOF
 n
 p
@@ -115,7 +112,7 @@ p
 
 w
 EOF
-
+set -e
 
 ## Write partitions
 
@@ -123,7 +120,7 @@ EOF
 losetup -d "$DEVICE"
 
 # Add mappings for our new device and store the output for mounting
-PARTS=kpartx -va "$IMAGE" | cut -d ' ' -f 3
+PARTS=`kpartx -va "$IMAGE" | cut -d ' ' -f 3`
 PART1=`echo "$PARTS" | head -n 1`
 PART2=`echo "$PARTS" | tail -n 1`
 
@@ -154,4 +151,7 @@ umount mnt
 ## SHA1
 SHA=`sha1sum "$IMAGE"`
 rename 's/SHA1/SHA1-$SHA/' "$IMAGE"
- 
+
+echo "Done!"
+exit 0
+

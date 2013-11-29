@@ -16,6 +16,7 @@
 PWD=`pwd`
 BUILD_DIR="/$PWD/build"
 DEBOOTSTRAP_DIR="$BUILD_DIR/debootstrap"
+FIRMWARE_DIR="/$PWD/lib/firmware"
 
 # Debian Mirror (change this for local cache or other base)
 DEB_MIRROR="http://archive.raspbian.org/raspbian/"
@@ -83,7 +84,7 @@ if_error "Bootstrap stage 2"
 git clone https://github.com/raspberrypi/firmware.git
 
 # Copy hard-float firmare into our rootfs
-cp -R firmware/hardfp/opt/* rootfs/opt/
+cp -R "$FIRMWARE_DIR/hardfp/opt/*" rootfs/opt/
 
 # Finally, set a root password
 echo "Set a root password for your device..."
@@ -93,11 +94,11 @@ chroot rootfs/ /usr/bin/passwd
 rm rootfs/usr/bin/qemu-arm-static
 
 # Copy over pre-compiled modules for Raspberry Pi
-cp -R firmware/modules/* rootfs/lib/modules/
+cp -R "$FIRMWARE_DIR/modules/*" rootfs/lib/modules/
 
 # Set up our boot fs -- this includes a pre-compiled kernel
 mkdir -p bootfs
-cp -R firmware/boot/* bootfs/
+cp -R "$FIRMWARE_DIR/boot/*" bootfs/
 
 if_error "RPi setup/config"
 

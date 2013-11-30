@@ -1,7 +1,7 @@
 SHELL=/bin/sh
 MAJOR_V=0
 MINOR_V=1
-IMAGE_SIZE=100
+IMAGE_SIZE=500
 
 # Debian Mirror (change this for local mirror or other base)
 DEB_MIRROR="http://archive.raspbian.org/raspbian/"
@@ -47,11 +47,15 @@ IMAGE=$(BUILD_DIR)/$(IMAGE_NAME).$(IMAGE_EXT)
 
 all: root boot image unmount dist
 
-clean:
+delete-map:
+	# Remove mappings to image
+	kpartx -d $(IMAGE)
+
+clean: delete-map
 	rm -rf $(BUILD_DIR)/*
 
 distclean:
-	rm -rf $(RELEASE_DIR)/*
+	rm -rf $(RELEASE_DIR)/*.img
 
 debootstrap-clean:
 	rm -rf $(DEBOOTSTRAP_DIR)
@@ -92,7 +96,7 @@ root: debootstrap
 	# TODO: Add additional config here
 
 	# Set a root password for your device...
-	chroot $(DEBOOTSTRAP_DIR)/rootfs/ /usr/bin/passwd
+	#chroot $(DEBOOTSTRAP_DIR)/rootfs/ /usr/bin/passwd
 
 	# Clean up emulation binaries
 	rm $(DEBOOTSTRAP_DIR)/rootfs/usr/bin/qemu-arm-static
@@ -107,33 +111,9 @@ empty-image:
 
 disk: empty-image
 	# Write partition table
-	$(SCRIPT_DIR)/partition.sh $(IMAGE)
+	$(SCRIPT_DIR)/partition.sh $(IMAGE) $(MOUNT_DIR)
 
-find-loop: disk
-	# Add mappings for our new device and store the output for mounting
-	PARTS=$(shell kpartx -va $(IMAGE) | cut -d ' ' -f 3)
-	PART1=$(shell echo $(PARTS) | head -n 1)
-	PART2=$(shell echo $(PARTS) | tail -n 1)
-
-	# Construct new boot/root partition devices
-	MAPPER=/dev/mapper
-	BOOTP=$(MAPPER)$(PART1)
-	ROOTP=$(MAPPER)$(PART2)
-
-format: find-loop
-	# Format partitions
-	mkfs.vfat $(BOOTP)
-	mkfs.ext4 $(ROOTP)
-
-mount: format
-	# Make temporary mnt directory and mount image
-	mkdir -p $(MOUNT_DIR)
-	mount $(ROOTP) $(MOUNT_DIR)
-
-	mkdir -p $(MOUNT_DIR)/boot
-	mount $(BOOTP) $(MOUNT_DIR)/boot
-
-image: root boot mount
+image: root boot disk
 	# Copy the output of debootstrap into the image
 	cp -r $(DEBOOTSTRAP_DIR)/rootfs/* $(MOUNT_DIR)/
 	cp -r $(DEBOOTSTRAP_DIR)/bootfs/* $(MOUNT_DIR)/boot/
@@ -143,11 +123,21 @@ unmount:
 	umount $(MOUNT_DIR)/boot
 	umount $(MOUNT_DIR)
 
-	# Remove mappings to image
-	kpartx -d $(IMAGE)
-
 	# Remove mount point
 	rm -rf $(MOUNT_DIR)
 
 dist:
 	$(SCRIPT_DIR)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) $(RELEASE_DIR)
+
+vm:
+	# Launch an emulator with the latest release	
+	qemu-system-arm \
+	 -kernel ./lib/kernel-qemu \
+	 -cpu arm1176 \
+	 -m 256 \
+	 -M versatilepb \
+	 -no-reboot \
+	 -serial stdio \
+	 -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
+	 -hda $(shell ls -st release/*.img | head -n 1 | cut -d ' ' -f 2)
+

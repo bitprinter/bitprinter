@@ -163,8 +163,11 @@ echo "Unmount image ..."
 umount mnt/boot
 umount mnt
 
+# Remove mappings to image
+kpartx -d "$IMAGE"
 
-## SHA1
+
+## Tag filename with SHA1
 echo "Compute SHA1 ..."
 
 SHA=`sha1sum "$IMAGE" | cut -d ' ' -f 1`
@@ -172,17 +175,16 @@ echo "SHA1: $SHA"
 
 rename "s/SHA1/SHA1\-$SHA/" "$IMAGE"
 
+
 ## Clean up
 echo "Clean up ..."
 
-# Remove mappings to image
-kpartx -d "$IMAGE"
+cd "$BUILD_DIR"
 
 # Remove mount point
 rm -rf mnt
 
 # Remove debootstrap dir
-cd "$BUILD_DIR"
 rm -rf "$DEBOOTSTRAP_DIR"
 
 echo "Done!"

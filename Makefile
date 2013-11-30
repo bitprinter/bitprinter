@@ -46,13 +46,13 @@ debootstrap: debootstrap-empty
 	# Bootstrap stage 1 ...
 
 	cd $(DEBOOTSTRAP_DIR)
-	rm -rf ./rootfs
+	rm -rf $(DEBOOTSTRAP_DIR)/rootfs
 	debootstrap \
 		--foreign \
 		--no-check-gpg --include=ca-certificates \
 		--arch=armhf \
 		testing \
-		rootfs \
+		$(DEBOOTSTRAP_DIR)/rootfs \
 		$(DEB_MIRROR)
 	cd $(BUILD_DIR)
 

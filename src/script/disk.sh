@@ -58,4 +58,3 @@ mount $ROOTP $MOUNT_DIR
 
 mkdir -p $MOUNT_DIR/boot
 mount $BOOTP $MOUNT_DIR/boot
-

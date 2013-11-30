@@ -9,13 +9,27 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 
 # Create a bootable bitprinter image for Raspberry Pi
 #
-# This will work best on Debian or Debian-like distros.
+# This is a rather abusive/hacky way to use `make`. We are not compiling
+# and most of this will need to be done as root. However, it does provide
+# a very convenient and familiar interface for getting the job done.
+#
+# In order to save time during development, debootstrap is not run every build.
+# Instead, run `make debootstrap-sync` when you wish to do a full network
+# update and copy the results into lib/debootstrap. Everything else will just
+# use copies lib/debootstrap.
+#
+# Targets:
+#  clean -- Clear out build directory
+#  distclean -- Clear out release directory
+#  debootstrap-sync -- Synchronize lib/debootstrap with latest found in mirror
+#  all -- Build a new image (used cached copy in lib/debootstrap)
 #
 # Depends: qemu, qemu-user, qemu-user-static, binfmt-support, git, debootstrap
 
 
 # Referenced directories
 BUILD_DIR=./build
+DEBOOTSTRAP_PARENT=./lib/debootstrap
 DEBOOTSTRAP_DIR=$(BUILD_DIR)/debootstrap
 FIRMWARE_DIR=./lib/firmware
 MOUNT_DIR=$(BUILD_DIR)/mnt
@@ -39,27 +53,32 @@ clean:
 distclean:
 	rm -rf $(RELEASE_DIR)/*
 
+debootstrap-clean:
+	rm -rf $(DEBOOTSTRAP_DIR)
+
 debootstrap-empty:
 	mkdir -p $(DEBOOTSTRAP_DIR)
 
-debootstrap: debootstrap-empty
-	# Bootstrap stage 1 ...
+debootstrap: debootstrap-clean debootstrap-empty
+	cp -R $(DEBOOTSTRAP_PARENT)/rootfs $(DEBOOTSTRAP_DIR)/rootfs
 
-	cd $(DEBOOTSTRAP_DIR)
-	rm -rf $(DEBOOTSTRAP_DIR)/rootfs
+debootstrap-sync:
+	# Bootstrap stage 1 ...
+	mkdir -p $(DEBOOTSTRAP_PARENT)
+	cd $(DEBOOTSTRAP_PARENT)
+	rm -rf $(DEBOOTSTRAP_PARENT)/rootfs
 	debootstrap \
 		--foreign \
 		--no-check-gpg --include=ca-certificates \
 		--arch=armhf \
 		testing \
-		$(DEBOOTSTRAP_DIR)/rootfs \
+		$(DEBOOTSTRAP_PARENT)/rootfs \
 		$(DEB_MIRROR)
-	cd $(BUILD_DIR)
 
 	# Bootstrap stage 2 ...
 	EXTRA_OPTS="-L/usr/lib/arm-linux-gnueabihf"
-	cp $(shell which qemu-arm-static) $(DEBOOTSTRAP_DIR)/rootfs/usr/bin/
-	chroot $(DEBOOTSTRAP_DIR)/rootfs/ /debootstrap/debootstrap --second-stage --verbose
+	cp $(shell which qemu-arm-static) $(DEBOOTSTRAP_PARENT)/rootfs/usr/bin/
+	chroot $(DEBOOTSTRAP_PARENT)/rootfs/ /debootstrap/debootstrap --second-stage --verbose
 
 root: debootstrap
 	# Running setup and configuration ...

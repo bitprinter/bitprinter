@@ -23,6 +23,7 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 #  distclean -- Clear out release directory
 #  debootstrap-sync -- Synchronize lib/debootstrap with latest found in mirror
 #  all -- Build a new image (used cached copy in lib/debootstrap)
+#  emulator -- Launch QEMU with the most recent release
 #
 # Depends: qemu, qemu-user, qemu-user-static, binfmt-support, git, debootstrap
 
@@ -36,11 +37,7 @@ MOUNT_DIR=$(BUILD_DIR)/mnt
 SCRIPT_DIR=./src/script
 RELEASE_DIR=./release
 
-# Name of created image
-DATE=$(shell date "+%s")
-#IMAGE=$(BUILD_DIR)/bitprinter-$(DATE)-SHA1.img
-
-# Experiment with same working name every time
+# Working name for image (pre-release)
 IMAGE_NAME=bitprinter
 IMAGE_EXT=img
 IMAGE=$(BUILD_DIR)/$(IMAGE_NAME).$(IMAGE_EXT)
@@ -129,7 +126,7 @@ unmount:
 dist:
 	$(SCRIPT_DIR)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) $(RELEASE_DIR)
 
-vm:
+emulator:
 	# Launch an emulator with the latest release	
 	qemu-system-arm \
 	 -kernel ./lib/kernel-qemu \

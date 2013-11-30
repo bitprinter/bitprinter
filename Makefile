@@ -137,4 +137,3 @@ emulator:
 	 -serial stdio \
 	 -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
 	 -hda $(shell ls -st release/*.img | head -n 1 | cut -d ' ' -f 2)
-

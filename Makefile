@@ -1,18 +1,18 @@
 SHELL=/bin/sh
 MAJOR_VERSION=0
 MINOR_VERSION=1
+IMAGE_SIZE=1000
+
+# Debian Mirror (change this for local mirror or other base)
+DEB_MIRROR="http://archive.raspbian.org/raspbian/"
+
 
 # Create a bootable bitprinter image for Raspberry Pi
-
-# This script is tested on Debian and Debian-based distros. The process
-# should be similar in other environments but may need some additional steps.
-
+#
+# This will work best on Debian or Debian-like distros.
+#
 # Depends: qemu, qemu-user, qemu-user-static, binfmt-support, git, debootstrap
 
-# Note Nov. 28, 2013 - Issues running in Arch Linux due to binfmt-support.
-
-
-## Globals
 
 # Referenced directories
 BUILD_DIR=./build
@@ -20,29 +20,23 @@ DEBOOTSTRAP_DIR=$(BUILD_DIR)/debootstrap
 FIRMWARE_DIR=./lib/firmware
 MOUNT_DIR=$(BUILD_DIR)/mnt
 
-# Debian Mirror (change this for local mirror or other base)
-DEB_MIRROR="http://archive.raspbian.org/raspbian/"
-
 # Name of created image
 DATE=$(shell date "+%s")
 IMAGE=$(BUILD_DIR)/bitprinter-$(DATE)-SHA1.img
 
-all: setup configure-root configure-boot image unmount sha
+all: configure-root configure-boot image unmount sha
 
 clean:
-	rm -rf $(BUILD_DIR)
+	rm -rf $(BUILD_DIR)/*
 
-setup:
-	@echo "Building into: $(IMAGE)"
-	@mkdir -p $(BUILD_DIR)
+debootstrap-empty:
+	mkdir -p $(DEBOOTSTRAP_DIR)
 
-stage1-clean: setup
-	rm -rf $(DEBOOTSTRAP_DIR)
-	mkdir $(DEBOOTSTRAP_DIR)
-
-stage1: stage1-clean
+debootstrap: debootstrap-empty
 	@echo "Bootstrapping stage 1 ..."
+
 	cd $(DEBOOTSTRAP_DIR)
+	rm -rf ./rootfs
 	debootstrap \
 		--foreign \
 		--no-check-gpg --include=ca-certificates \
@@ -52,13 +46,12 @@ stage1: stage1-clean
 		$(DEB_MIRROR)
 	cd $(BUILD_DIR)
 
-stage2: stage1
 	@echo "Bootstrapping stage 2 ..."
 	EXTRA_OPTS="-L/usr/lib/arm-linux-gnueabihf"
 	cp $(shell which qemu-arm-static) $(DEBOOTSTRAP_DIR)/rootfs/usr/bin/
 	chroot $(DEBOOTSTRAP_DIR)/rootfs/ /debootstrap/debootstrap --second-stage --verbose
 
-configure-root: stage2
+configure-root: debootstrap
 	@echo "Running setup and configuration ..."
 
 	# Copy hard-float firmare into our rootfs
@@ -75,13 +68,13 @@ configure-root: stage2
 	# Clean up emulation binaries
 	rm $(DEBOOTSTRAP_DIR)/rootfs/usr/bin/qemu-arm-static
 
-configure-boot: stage2
+configure-boot: debootstrap-empty
 	mkdir -p $(DEBOOTSTRAP_DIR)/bootfs
 	cp -R $(FIRMWARE_DIR)/boot/* $(DEBOOTSTRAP_DIR)/bootfs/
 
-empty-image: setup
+empty-image:
 	@echo "Creating an empty image ..."
-	dd if=/dev/zero of=$(IMAGE) bs=1M count=1000
+	dd if=/dev/zero of=$(IMAGE) bs=1M count=$(IMAGE_SIZE)
 
 disk: empty-image
 	@echo "Writing partition table"
@@ -106,6 +99,7 @@ disk: empty-image
 		w
 		EOF
 
+loop: disk
 	# Run setup on the formatted loop device
 	losetup -d $(DEVICE)
 
@@ -119,11 +113,12 @@ disk: empty-image
 	BOOTP=$(MAPPER)$(PART1)
 	ROOTP=$(MAPPER)$(PART2)
 
+format: loop
 	# Format partitions
 	mkfs.vfat $(BOOTP)
 	mkfs.ext4 $(ROOTP)
 
-mount: disk
+mount: format
 	# Make temporary mnt directory and mount image
 	mkdir -p $(MOUNT_DIR)
 	mount $(ROOTP) $(MOUNT_DIR)

@@ -27,6 +27,7 @@ IMAGE="bitprinter-$DATE-SHA1.img"
 
 
 ## Initial setup
+echo "Initial setup ..."
 
 echo "Building into: $BUILD_DIR/$IMAGE"
 
@@ -34,10 +35,12 @@ echo "Building into: $BUILD_DIR/$IMAGE"
 mkdir -p "$BUILD_DIR"
 
 ## Bootstrap stage 1
+echo "Bootstrap stage 1 ..."
 
 # Clean any old debootstrap dir
 rm -rf "$DEBOOTSTRAP_DIR"
 mkdir "$DEBOOTSTRAP_DIR"
+cd "$DEBOOTSTRAP_DIR"
 
 # Bootstrap the initial system
 debootstrap \
@@ -50,6 +53,7 @@ debootstrap \
 
 
 ## Bootstrap stage 2
+echo "Bootstrap stage 2 ..."
 
 # Ensure we build with hard-float support
 EXTRA_OPTS="-L/usr/lib/arm-linux-gnueabihf"
@@ -62,6 +66,7 @@ chroot rootfs/ /debootstrap/debootstrap --second-stage --verbose
 
 
 ## Raspberry Pi setup and configuration
+echo "Setup and configuration ..."
 
 # Copy hard-float firmare into our rootfs
 cp -R "$FIRMWARE_DIR"/hardfp/opt/* rootfs/opt/
@@ -82,6 +87,7 @@ cp -R "$FIRMWARE_DIR"/boot/* bootfs/
 
 
 ## Create empty image
+echo "Create empty image ..."
 
 # Move back to base working directory
 cd "$BUILD_DIR"
@@ -91,6 +97,7 @@ dd if=/dev/zero of="$IMAGE" bs=1M count=1000
 
 
 ## Format disk
+echo "Format disk ..."
 
 # Setup and store the location of our image
 DEVICE=`losetup -f --show "$IMAGE"`
@@ -115,6 +122,7 @@ EOF
 set -e
 
 ## Write partitions
+echo "Write partitions ..."
 
 # Run setup on the formatted loop device
 losetup -d "$DEVICE"
@@ -129,28 +137,53 @@ MAPPER="/dev/mapper"
 BOOTP="$MAPPER/$PART1"
 ROOTP="$MAPPER/$PART2"
 
-# Make temporary mnt directory
-mkdir -p mnt
+# Format partitions
+echo "Format partitions ..."
+mkfs.vfat "$BOOTP"
+mkfs.ext4 "$ROOTP"
 
-# Mount the image into the temporary directory
+# Make temporary mnt directory and mount image
+mkdir -p mnt
 mount "$ROOTP" mnt
+
+mkdir -p mnt/boot
 mount "$BOOTP" mnt/boot
 
 # Copy the output of debootstrap into the image
+echo "Copy debootstrap output into image ..."
+
 cp -r "$DEBOOTSTRAP_DIR"/rootfs/* mnt/
 cp -r "$DEBOOTSTRAP_DIR"/bootfs/* mnt/boot/
 
 
 ## Unmount
+echo "Unmount image ..."
 
-# Unmount the image
+# Unmount the image and remove temporary mount point
 umount mnt/boot
 umount mnt
 
 
 ## SHA1
-SHA=`sha1sum "$IMAGE"`
-rename 's/SHA1/SHA1-$SHA/' "$IMAGE"
+echo "Compute SHA1 ..."
+
+SHA=`sha1sum "$IMAGE" | cut -d ' ' -f 1`
+echo "SHA1: $SHA"
+
+rename "s/SHA1/SHA1\-$SHA/" "$IMAGE"
+
+## Clean up
+echo "Clean up ..."
+
+# Remove mappings to image
+kpartx -d "$IMAGE"
+
+# Remove mount point
+rm -rf mnt
+
+# Remove debootstrap dir
+cd "$BUILD_DIR"
+rm -rf "$DEBOOTSTRAP_DIR"
 
 echo "Done!"
 exit 0

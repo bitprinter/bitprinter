@@ -25,7 +25,7 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 #  all -- Build a new image (used cached copy in lib/debootstrap)
 #  emulator -- Launch QEMU with the most recent release
 #
-# Depends: qemu, qemu-user, qemu-user-static, binfmt-support, git, debootstrap
+# Depends: qemu, qemu-user, qemu-user-static, binfmt-support, debootstrap
 
 
 # Referenced directories
@@ -107,8 +107,8 @@ empty-image:
 	dd if=/dev/zero of=$(IMAGE) bs=1M count=$(IMAGE_SIZE)
 
 disk: empty-image
-	# Write partition table
-	$(SCRIPT_DIR)/partition.sh $(IMAGE) $(MOUNT_DIR)
+	# Handle creation, partitioning, formatting and mounting a new disk
+	$(SCRIPT_DIR)/disk.sh $(IMAGE) $(MOUNT_DIR)
 
 image: root boot disk
 	# Copy the output of debootstrap into the image
@@ -127,7 +127,7 @@ dist:
 	$(SCRIPT_DIR)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) $(RELEASE_DIR)
 
 emulator:
-	# Launch an emulator with the latest release	
+	# Launch an emulator with the latest release
 	qemu-system-arm \
 	 -kernel ./lib/kernel-qemu \
 	 -cpu arm1176 \

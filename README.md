@@ -100,7 +100,9 @@ Entropy is a particularly difficult thing to have confidence in. If desired, a u
 Persistence
 -----------
 
-Except in the case of special usability needs, bitprinter should never store anything to disk. All data that needs to persist after shutdown should be saved by printing. Bitprinter should boot up and shutdown extremely quickly, cleanly, and without any user intervention otherwise there is incentive to leave the computer on all the time. The entire contents of memory should be wiped during each shutdown to protect against cold-boot attacks.
+By default bitprinter should never store anything to disk. All data that needs to persist after shutdown should be saved by printing. Bitprinter should boot up and shutdown extremely quickly, cleanly, and without any user intervention otherwise there is incentive to leave the computer on all the time. The entire contents of memory should be wiped during each shutdown to protect against cold-boot attacks. These measures will help prevent previous bitprinter output from being compromised if someone gains physical access to a device that you have used.
+
+These precautions only matter if you are concerned about the physical security of the device. Furthermore, it does not protect against other attacks someone could perform with physical access, especially if that access is covert (like installing a logger and collecting data from it later).
 
 
 Auditing

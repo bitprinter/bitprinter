@@ -50,7 +50,7 @@ For example, I would run this when starting on a new machine or testing a propos
     sudo make emulator
 
 
-If you've come this far, then chances are you want to customize the OS that is produced so you can make your Raspberry Pi do something new. All customization should be put into src/script/customize.sh. This gets run after the second-stage bootstrap and while we are still able to chroot into an emulated environment. As an example, it currently prompts the user to set a root password.
+If you've come this far, then chances are you want to customize the OS that is produced so you can make your Raspberry Pi do something new. All customization should be put into src/script/customize.sh. This gets run after the second-stage bootstrap and while we are still able to chroot into an emulated environment. As an example, it currently prompts the user to set a root password. In the near future, this is where we will set our hostname, apply other configuration, install needed packages and remove those that are not needed.
 
 
 Hardware

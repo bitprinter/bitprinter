@@ -25,7 +25,7 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 #  all -- Build a new image (used cached copy in lib/debootstrap)
 #  emulator -- Launch QEMU with the most recent release
 #
-# Depends: qemu, qemu-user, qemu-user-static, binfmt-support, debootstrap
+# Depends: qemu, qemu-user, qemu-user-static, binfmt-support, kpartx, debootstrap
 
 
 # Referenced directories
@@ -35,7 +35,7 @@ DEBOOTSTRAP_DIR=$(BUILD_DIR)/debootstrap
 FIRMWARE_DIR=./lib/firmware
 MOUNT_DIR=$(BUILD_DIR)/mnt
 SCRIPT_DIR=./src/script
-RELEASE_DIR=./release
+STAGING_DIR=./staging
 
 # Working name for image (pre-release)
 IMAGE_NAME=bitprinter
@@ -52,7 +52,7 @@ clean: delete-map
 	rm -rf $(BUILD_DIR)/*
 
 distclean:
-	rm -rf $(RELEASE_DIR)/*.img
+	rm -rf $(STAGING_DIR)/*.img
 
 debootstrap-clean:
 	rm -rf $(DEBOOTSTRAP_DIR)
@@ -124,7 +124,7 @@ unmount:
 	rm -rf $(MOUNT_DIR)
 
 dist:
-	$(SCRIPT_DIR)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) $(RELEASE_DIR)
+	$(SCRIPT_DIR)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) $(STAGING_DIR)
 
 emulator:
 	# Launch an emulator with the latest release

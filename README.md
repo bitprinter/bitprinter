@@ -22,18 +22,22 @@ Getting Started
 This project is not ready for regular use. If you are a developer and want to get started right away, you'll probably want to set up some Debian-like environment (Debian, Ubuntu, Mint, etc.) if you don't run one already. One of my goals is to ensure that the list of suitable development environments grows over time, eventually covering all major distros and perhaps even OS X. The reality is that we need debootstrap and it is best supported on Debian for the obvious reasons. If you feel like hacking at it and get this running in some other environment, please let me know or just submit a pull request with the necessary changes. If you can get this working in Arch (binfmt-support is less than stable right now) you are my hero so please contact me right away! If you don't run Debian or Ubuntu or whatever, it's probably easiest to do it in Virtual Box for now.
 
 To start, clone this repo and grab the required dependencies:
+
     sudo apt-get install git qemu qemu-user qemu-user-static binfmt-support kpartx debootstrap
     git clone https://github.com/bitprinter/bitprinter.git
 
 Now we need to populate the third-party libraries. This includes a 2.25GB repo from the Raspberry Pi team containing pre-compiled firmware modules and a kernel:
+
     cd bitprinter
     git submodule init
     git submodule update
 
 Finally, we run the vanilla portion of debootstrap. This can take a long time too (15-60 minutes), so we do this apart from the normal build and save everything in ./lib. You can run this any time to get a fresh copy from debootstrap, but it needs to be run at least once when first setting everything up:
+
     sudo make debootstrap-sync
 
 Now we have the Raspberry Pi firmware, kernel, and a very basic instance of Debian bootstrapped for ARM all on our local machine! From here we can quickly build bootable Raspberry Pi images through these `make` targets:
+
     sudo make all -- Build a new image (using debootstrap copy in ./lib/debootstrap)
     sudo make emulator -- Launch QEMU with the most recent image in staging
     sudo make clean -- Clear out the entire build directory

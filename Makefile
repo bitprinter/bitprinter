@@ -25,7 +25,7 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 #  all -- Build a new image (used cached copy in lib/debootstrap)
 #  emulator -- Launch QEMU with the most recent release
 #
-# Depends: qemu, qemu-user, qemu-user-static, binfmt-support, git, debootstrap
+# Depends: qemu, qemu-user, qemu-user-static, binfmt-support, kpartx, debootstrap
 
 
 # Referenced directories
@@ -35,7 +35,7 @@ DEBOOTSTRAP_DIR=$(BUILD_DIR)/debootstrap
 FIRMWARE_DIR=./lib/firmware
 MOUNT_DIR=$(BUILD_DIR)/mnt
 SCRIPT_DIR=./src/script
-RELEASE_DIR=./release
+STAGING_DIR=./staging
 
 # Working name for image (pre-release)
 IMAGE_NAME=bitprinter
@@ -52,7 +52,7 @@ clean: delete-map
 	rm -rf $(BUILD_DIR)/*
 
 distclean:
-	rm -rf $(RELEASE_DIR)/*.img
+	rm -rf $(STAGING_DIR)/*.img
 
 debootstrap-clean:
 	rm -rf $(DEBOOTSTRAP_DIR)
@@ -61,7 +61,7 @@ debootstrap-empty:
 	mkdir -p $(DEBOOTSTRAP_DIR)
 
 debootstrap: debootstrap-clean debootstrap-empty
-	cp -R $(DEBOOTSTRAP_PARENT)/rootfs $(DEBOOTSTRAP_DIR)/rootfs
+	cp -r $(DEBOOTSTRAP_PARENT)/rootfs $(DEBOOTSTRAP_DIR)/rootfs
 
 debootstrap-sync:
 	# Bootstrap stage 1 ...
@@ -85,30 +85,28 @@ root: debootstrap
 	# Running setup and configuration ...
 
 	# Copy hard-float firmare into our rootfs
-	cp -R $(FIRMWARE_DIR)/hardfp/opt/* $(DEBOOTSTRAP_DIR)/rootfs/opt/
+	cp -r $(FIRMWARE_DIR)/hardfp/opt/* $(DEBOOTSTRAP_DIR)/rootfs/opt/
 
 	# Copy over pre-compiled modules for Raspberry Pi
-	cp -R $(FIRMWARE_DIR)/modules/* $(DEBOOTSTRAP_DIR)/rootfs/lib/modules/
+	cp -r $(FIRMWARE_DIR)/modules/* $(DEBOOTSTRAP_DIR)/rootfs/lib/modules/
 
-	# TODO: Add additional config here
-
-	# Set a root password for your device...
-	#chroot $(DEBOOTSTRAP_DIR)/rootfs/ /usr/bin/passwd
+	# Run bitprinter customization script
+	$(SCRIPT_DIR)/customize.sh $(DEBOOTSTRAP_DIR)
 
 	# Clean up emulation binaries
 	rm $(DEBOOTSTRAP_DIR)/rootfs/usr/bin/qemu-arm-static
 
 boot: debootstrap-empty
 	mkdir -p $(DEBOOTSTRAP_DIR)/bootfs
-	cp -R $(FIRMWARE_DIR)/boot/* $(DEBOOTSTRAP_DIR)/bootfs/
+	cp -r $(FIRMWARE_DIR)/boot/* $(DEBOOTSTRAP_DIR)/bootfs/
 
 empty-image:
 	# Create an empty image ...
 	dd if=/dev/zero of=$(IMAGE) bs=1M count=$(IMAGE_SIZE)
 
 disk: empty-image
-	# Write partition table
-	$(SCRIPT_DIR)/partition.sh $(IMAGE) $(MOUNT_DIR)
+	# Handle creation, partitioning, formatting and mounting a new disk
+	$(SCRIPT_DIR)/disk.sh $(IMAGE) $(MOUNT_DIR)
 
 image: root boot disk
 	# Copy the output of debootstrap into the image
@@ -124,10 +122,10 @@ unmount:
 	rm -rf $(MOUNT_DIR)
 
 dist:
-	$(SCRIPT_DIR)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) $(RELEASE_DIR)
+	$(SCRIPT_DIR)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) $(STAGING_DIR)
 
 emulator:
-	# Launch an emulator with the latest release	
+	# Launch an emulator with the latest release
 	qemu-system-arm \
 	 -kernel ./lib/kernel-qemu \
 	 -cpu arm1176 \
@@ -136,4 +134,4 @@ emulator:
 	 -no-reboot \
 	 -serial stdio \
 	 -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
-	 -hda $(shell ls -st release/*.img | head -n 1 | cut -d ' ' -f 2)
+	 -hda $(shell ls -st $(STAGING_DIR)/*.img | head -n 1 | cut -d ' ' -f 2)

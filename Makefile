@@ -61,7 +61,7 @@ debootstrap-empty:
 	mkdir -p $(DEBOOTSTRAP_DIR)
 
 debootstrap: debootstrap-clean debootstrap-empty
-	cp -R $(DEBOOTSTRAP_PARENT)/rootfs $(DEBOOTSTRAP_DIR)/rootfs
+	cp -r $(DEBOOTSTRAP_PARENT)/rootfs $(DEBOOTSTRAP_DIR)/rootfs
 
 debootstrap-sync:
 	# Bootstrap stage 1 ...
@@ -85,10 +85,10 @@ root: debootstrap
 	# Running setup and configuration ...
 
 	# Copy hard-float firmare into our rootfs
-	cp -R $(FIRMWARE_DIR)/hardfp/opt/* $(DEBOOTSTRAP_DIR)/rootfs/opt/
+	cp -r $(FIRMWARE_DIR)/hardfp/opt/* $(DEBOOTSTRAP_DIR)/rootfs/opt/
 
 	# Copy over pre-compiled modules for Raspberry Pi
-	cp -R $(FIRMWARE_DIR)/modules/* $(DEBOOTSTRAP_DIR)/rootfs/lib/modules/
+	cp -r $(FIRMWARE_DIR)/modules/* $(DEBOOTSTRAP_DIR)/rootfs/lib/modules/
 
 	# Run bitprinter customization script
 	$(SCRIPT_DIR)/customize.sh $(DEBOOTSTRAP_DIR)
@@ -98,7 +98,7 @@ root: debootstrap
 
 boot: debootstrap-empty
 	mkdir -p $(DEBOOTSTRAP_DIR)/bootfs
-	cp -R $(FIRMWARE_DIR)/boot/* $(DEBOOTSTRAP_DIR)/bootfs/
+	cp -r $(FIRMWARE_DIR)/boot/* $(DEBOOTSTRAP_DIR)/bootfs/
 
 empty-image:
 	# Create an empty image ...

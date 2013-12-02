@@ -35,6 +35,9 @@ EOF
 # Turn error checking back on
 set -e
 
+# Give fdisk a couple seconds to finish
+sleep 5
+
 # Run setup on the formatted loop device
 losetup -d $DEVICE
 

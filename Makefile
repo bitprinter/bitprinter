@@ -90,8 +90,9 @@ root: debootstrap
 	# Copy over pre-compiled modules for Raspberry Pi
 	cp -r $(FIRMWARE_DIR)/modules/* $(DEBOOTSTRAP_DIR)/rootfs/lib/modules/
 
-	# Run bitprinter customization script
-	$(SCRIPT_DIR)/customize.sh $(DEBOOTSTRAP_DIR) config.sh
+	# Run bitprinter config script
+	cp ./config.sh $(DEBOOTSTRAP_DIR)/rootfs/root/
+	chroot $(DEBOOTSTRAP_DIR)/rootfs/ /root/config.sh
 
 	# Clean up emulation binaries
 	rm $(DEBOOTSTRAP_DIR)/rootfs/usr/bin/qemu-arm-static

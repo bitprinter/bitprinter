@@ -36,6 +36,7 @@ FIRMWARE_DIR=./lib/firmware
 MOUNT_DIR=$(BUILD_DIR)/mnt
 SCRIPT_DIR=./src/script
 STAGING_DIR=./staging
+ASSETS_DIR=./assets
 
 # Working name for image (pre-release)
 IMAGE_NAME=bitprinter
@@ -89,7 +90,10 @@ root: debootstrap
 
 	# Copy over pre-compiled modules for Raspberry Pi
 	cp -r $(FIRMWARE_DIR)/modules/* $(DEBOOTSTRAP_DIR)/rootfs/lib/modules/
-
+	
+	# Copy bitprinter specific assets
+	cp -r $(ASSETS_DIR)/* $(DEBOOTSTRAP_DIR)/
+	
 	# Run bitprinter config script
 	cp ./config.sh $(DEBOOTSTRAP_DIR)/rootfs/root/
 	chroot $(DEBOOTSTRAP_DIR)/rootfs/ /root/config.sh

@@ -41,7 +41,7 @@ Now we have the Raspberry Pi firmware, kernel, and a very basic instance of Debi
 * all -- Build a new image (using debootstrap copy in ./lib/debootstrap)
 * emulator -- Launch QEMU with the most recent image in staging
 * clean -- Clear out the entire build directory
-* distclean -- Clear out the entire staging directory
+* dist-clean -- Clear out the entire staging directory
 
 For example, I would run this when starting on a new machine or testing a proposed change:
 

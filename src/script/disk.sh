@@ -35,10 +35,6 @@ EOF
 # Turn error checking back on
 set -e
 
-# Give fdisk a couple seconds to finish
-echo "fdisk complete - Waiting 5 seconds ..."
-sleep 5
-
 # Run setup on the formatted loop device
 echo "Running losetup ..."
 losetup -d $DEVICE

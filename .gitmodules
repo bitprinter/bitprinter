@@ -1,3 +1,0 @@
-[submodule "lib/firmware"]
-	path = lib/firmware
-	url = https://github.com/bitprinter/firmware.git

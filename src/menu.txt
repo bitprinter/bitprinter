@@ -1,0 +1,34 @@
+- mode [bitcoin, pgp, ssl, tor, words, rand, settings] (default bitcoin)
+    ? bitcoin
+        - wallet_type [standard, BIPS0038, brain, vanity] (default standard)
+            ? BIPS0038
+                - input [keyboard, random]
+                    ? keyboard
+                        - launch keyboard
+                    ? random
+                        - link to menu 'words'
+            ? brain
+                - input [keyboard, random]
+                    ? keyboard
+                        - launch keyboard
+                    ? random
+                        - link to menu 'words'
+            ? vanity
+                - launch keyboard
+    ? pgp (todo)
+    ? ssl (todo)
+    ? tor
+        - url_type [standard, vanity]
+            ? vanity
+                - launch keyboard
+    ? words
+        - wordlist [ls /bitprinter/diceware/*]
+    ? rand
+        - blocksize [0...99]
+    ? settings
+        - default number [1...99] (default 1)
+        - default copies [1...99] (default 2)
+        - entropy [hardware, prompt] (default hardware)
+        - print audit [yes, no] (default yes)
+- number [1...99] (default 1)
+- copies [0...99] (default 2)

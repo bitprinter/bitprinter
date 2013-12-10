@@ -19,38 +19,9 @@ This project is in its infancy. Nothing here should be taken to suggest that thi
 Getting Started
 ---------------
 
-This project is not ready for regular use. If you are a developer and want to get started right away, you'll probably want to set up some Debian-like environment (Debian, Ubuntu, Mint, etc.) if you don't run one already. One of my goals is to ensure that the list of suitable development environments grows over time, eventually covering all major distros and perhaps even OS X. The reality is that we need debootstrap and it is best supported on Debian for the obvious reasons. If you feel like hacking at it and get this running in some other environment, please let me know or just submit a pull request with the necessary changes. If you can get this working in Arch (binfmt-support is less than stable right now) you are my hero so please contact me right away! If you don't run Debian or Ubuntu or whatever, it's probably easiest to do it in Virtual Box for now.
+This project is not ready for regular use. If you are a developer and want to get started right away, you will need to download VirtualBox and Vagrant along with this repository. This code needs to run in a specific build environment in order to create bootable images for the Raspberry Pi. In order to keep this project portable, Vagrant is used and the virtual machine containing the build environment is included in this repository.
 
-To start, grab the required dependencies and clone this repo:
-
-    sudo apt-get install git qemu qemu-user qemu-user-static binfmt-support kpartx debootstrap
-    git clone https://github.com/bitprinter/bitprinter.git
-
-Now we need to populate the third-party libraries. This includes a 2.25GB repo from the Raspberry Pi team containing pre-compiled firmware modules and a kernel:
-
-    cd bitprinter
-    git submodule init
-    git submodule update
-
-Finally, we run the vanilla portion of debootstrap. This can take a long time too (15-60 minutes), so we do this apart from the normal build and save everything in ./lib. You can run this any time to get a fresh copy from debootstrap, but it needs to be run at least once when first setting everything up:
-
-    sudo make debootstrap-sync
-
-Now we have the Raspberry Pi firmware, kernel, and a very basic instance of Debian bootstrapped for ARM all on our local machine. From here we can quickly build bootable Raspberry Pi images through the following `make` targets:
-
-* all -- Build a new image (using debootstrap copy in ./lib/debootstrap)
-* emulator -- Launch QEMU with the most recent image in staging
-* clean -- Clear out the entire build directory
-* dist-clean -- Clear out the entire staging directory
-
-For example, I would run this when starting on a new machine or testing a proposed change:
-
-    sudo make clean
-    sudo make
-    sudo make emulator
-
-
-If you've come this far, then chances are you want to customize the OS that is produced so you can make your Raspberry Pi do something new. All customization should be put into src/script/customize.sh. This gets run after the second-stage bootstrap and while we are still able to chroot into an emulated environment. As an example, it currently prompts the user to set a root password. In the near future, this is where we will set our hostname, apply other configuration, install needed packages and remove those that are not needed.
+For more information, see [INSTALL.md](install.md)
 
 
 Hardware
@@ -89,6 +60,8 @@ The specific feature-set should be entirely customizable by the end user. This p
 4. TOR Hidden Service Keys
 5. Passphrases (eg. Diceware)
 6. (Pseudo-) Random Number Generator (from user seed or hardware)
+
+For more information, see [menu.txt](src/menu.txt)
 
 
 Entropy

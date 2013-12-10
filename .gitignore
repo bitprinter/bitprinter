@@ -1,7 +1,13 @@
+# Vim swap files
 *.swp
 *.swo
 
-config.sh
-build/*
-lib/debootstrap/*
-staging/*.img
+# Vagrant helper dir
+.vagrant
+
+# Third-party deps (not version-controlled)
+lib/package.box
+lib/firmware
+
+# Built images
+bitprinter*.img

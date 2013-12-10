@@ -32,12 +32,12 @@ w
 EOF
 } # > /dev/null 2>&1
 
+# Run setup on the formatted loop device
+echo "Deleting loop: $DEVICE ..."
+losetup -d $DEVICE
+
 # Turn error checking back on
 set -e
-
-# Run setup on the formatted loop device
-echo "Running losetup ..."
-losetup -d $DEVICE
 
 # Add mappings for our new device and store the output for mounting
 echo "Running kpartx ..."

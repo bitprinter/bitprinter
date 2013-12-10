@@ -51,7 +51,7 @@ IMAGE=$(BUILD)/$(IMAGE_NAME).$(IMAGE_EXT)
 
 # Host make targets
 git-firmware:
-	if [ -a $(FIRMWARE) ] ; then git clone $(FIRMWARE_REPO) $(FIRMWARE) ; fi ;
+	if [ ! -d $(FIRMWARE) ] ; then git clone $(FIRMWARE_REPO) $(FIRMWARE) ; fi ;
 
 vagrant-up:
 	vagrant up

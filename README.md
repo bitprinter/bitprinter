@@ -21,7 +21,7 @@ Getting Started
 
 This project is not ready for regular use. If you are a developer and want to get started right away, you will need to download VirtualBox and Vagrant along with this repository. This code needs to run in a specific build environment in order to create bootable images for the Raspberry Pi. In order to keep this project portable, Vagrant is used and the virtual machine containing the build environment is included in this repository.
 
-For more information, see [INSTALL.md](install.md)
+For more information, see [INSTALL.md](INSTALL.md)
 
 
 Hardware

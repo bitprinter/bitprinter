@@ -1,5 +1,13 @@
+# Vim swap files
 *.swp
 *.swo
+
+# Vagrant helper dir
 .vagrant
+
+# Third-party deps (not version-controlled)
 lib/package.box
 lib/firmware
+
+# Built images
+bitprinter*.img

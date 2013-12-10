@@ -21,32 +21,7 @@ Getting Started
 
 This project is not ready for regular use. If you are a developer and want to get started right away, you will need to download VirtualBox and Vagrant along with this repository. This code needs to run in a specific build environment in order to create bootable images for the Raspberry Pi. In order to keep this project portable, Vagrant is used and the virtual machine containing the build environment is included in this repository.
 
-To start, clone this repo:
-
-    git clone https://github.com/bitprinter/bitprinter.git
-
-Now we need to populate the third-party libraries. This includes a 2.25GB repo from the Raspberry Pi team containing pre-compiled firmware modules and a kernel:
-
-    cd bitprinter
-    git submodule init
-    git submodule update
-
-Finally, we initialize vagrant
-    vagrant up
-
-Now we have the Raspberry Pi firmware, kernel, and a very basic instance of Debian bootstrapped for ARM all on our local machine. From here we can quickly build bootable Raspberry Pi images through the following `make` targets:
-
-* all -- Build a new image (used cached copy in /tmp/debootstrap)
-* clean -- Clear out build directory
-* dist-clean -- Remove all images in main bitprinter directory
-
-For example, I would run this within after starting up a new machine or testing a proposed change:
-
-    vagrant ssh
-    sudo make clean
-    sudo make
-
-If you've come this far, then chances are you want to customize the OS that is produced so you can make your Raspberry Pi do something new. All customization should be put into src/script/config.sh. This gets run after the second-stage bootstrap and while we are still able to chroot into an emulated environment. This is where we set a root password, set our hostname, apply other configuration, install needed packages and remove those that are not needed.
+For more information, see [INSTALL.md](install.md)
 
 
 Hardware
@@ -85,6 +60,8 @@ The specific feature-set should be entirely customizable by the end user. This p
 4. TOR Hidden Service Keys
 5. Passphrases (eg. Diceware)
 6. (Pseudo-) Random Number Generator (from user seed or hardware)
+
+For more information, see [menu.txt](src/menu.txt)
 
 
 Entropy

@@ -18,15 +18,20 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 # update and copy the results into lib/debootstrap. Everything else will just
 # use copies lib/debootstrap.
 #
-# Targets:
+# Host Targets:
+#  init -- Helper to get firmware and create build server
+#  build -- SSH into Vagrant box and run `make all`
+#  emulator -- Launch QEMU with the most recent image
+#
+# Guest Targets:
 #  clean -- Clear out build directory
 #  dist-clean -- Remove all images in main bitprinter directory
 #  debootstrap-sync -- Synchronize /tmp/debootstrap with latest found in mirror
 #  all -- Build a new image (used cached copy in /tmp/debootstrap)
-#  emulator -- Launch QEMU with the most recent image
 #
 # Depends: qemu, qemu-user, qemu-user-static, binfmt-support, kpartx, debootstrap
 
+FIRMWARE_REPO="https://github.com/bitprinter/firmware.git"
 
 # Referenced directories
 FIRMWARE=./lib/firmware
@@ -44,6 +49,31 @@ IMAGE_NAME=bitprinter
 IMAGE_EXT=img
 IMAGE=$(BUILD)/$(IMAGE_NAME).$(IMAGE_EXT)
 
+# Host make targets
+git-firmware:
+	if [ -a $(FIRMWARE) ] ; then git clone $(FIRMWARE_REPO) $(FIRMWARE) ; fi ;
+
+vagrant-up:
+	vagrant up
+
+init: git-firmware vagrant-up
+
+build:
+	vagrant ssh -c "cd /vagrant ; sudo make all"
+
+emulator:
+	# Launch an emulator with the latest release
+	qemu-system-arm \
+	 -kernel ./lib/kernel-qemu \
+	 -cpu arm1176 \
+	 -m 256 \
+	 -M versatilepb \
+	 -no-reboot \
+	 -serial stdio \
+	 -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
+	 -hda $(shell ls -st ./*.img | head -n 1 | cut -d ' ' -f 2)
+
+# Guest make targets
 all: root boot image unmount dist
 
 delete-map:
@@ -129,15 +159,3 @@ unmount:
 
 dist:
 	$(SCRIPT)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) .
-
-emulator:
-	# Launch an emulator with the latest release
-	qemu-system-arm \
-	 -kernel ./lib/kernel-qemu \
-	 -cpu arm1176 \
-	 -m 256 \
-	 -M versatilepb \
-	 -no-reboot \
-	 -serial stdio \
-	 -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
-	 -hda $(shell ls -st ./*.img | head -n 1 | cut -d ' ' -f 2)

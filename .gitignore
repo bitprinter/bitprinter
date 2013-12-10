@@ -1,7 +1,3 @@
 *.swp
 *.swo
-
-config.sh
-build/*
-lib/debootstrap/*
-staging/*.img
+.vagrant

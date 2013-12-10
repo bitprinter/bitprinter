@@ -20,49 +20,50 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 #
 # Targets:
 #  clean -- Clear out build directory
-#  dist-clean -- Clear out release directory
-#  debootstrap-sync -- Synchronize lib/debootstrap with latest found in mirror
-#  all -- Build a new image (used cached copy in lib/debootstrap)
-#  emulator -- Launch QEMU with the most recent release
+#  dist-clean -- Remove all images in main bitprinter directory
+#  debootstrap-sync -- Synchronize /tmp/debootstrap with latest found in mirror
+#  all -- Build a new image (used cached copy in /tmp/debootstrap)
+#  emulator -- Launch QEMU with the most recent image
 #
 # Depends: qemu, qemu-user, qemu-user-static, binfmt-support, kpartx, debootstrap
 
 
 # Referenced directories
-BUILD_DIR=./build
-DEBOOTSTRAP_PARENT=./lib/debootstrap
-DEBOOTSTRAP_DIR=$(BUILD_DIR)/debootstrap
-FIRMWARE_DIR=./lib/firmware
-MOUNT_DIR=$(BUILD_DIR)/mnt
-SCRIPT_DIR=./src/script
-STAGING_DIR=./staging
-ASSETS_DIR=./assets
+FIRMWARE=./lib/firmware
+SCRIPT=./src/script
+ASSETS=./assets
+
+# Build Directories
+DEBOOTSTRAP_PARENT=/tmp/debootstrap
+BUILD=/tmp/build
+DEBOOTSTRAP=$(BUILD)/debootstrap
+MOUNT=$(BUILD)/mnt
 
 # Working name for image (pre-release)
 IMAGE_NAME=bitprinter
 IMAGE_EXT=img
-IMAGE=$(BUILD_DIR)/$(IMAGE_NAME).$(IMAGE_EXT)
+IMAGE=$(BUILD)/$(IMAGE_NAME).$(IMAGE_EXT)
 
 all: root boot image unmount dist
 
 delete-map:
-	# Remove mappings to image
-	kpartx -d $(IMAGE)
+	# Remove mappings to image if it exists
+	if [ -f $(IMAGE) ] ; then kpartx -d $(IMAGE) ; fi ;
 
-clean: delete-map
-	rm -rf $(BUILD_DIR)/*
+clean: delete-map debootstrap-clean
+	rm -rf $(BUILD)/*
 
 dist-clean:
-	rm -rf $(STAGING_DIR)/*.img
+	rm -rf ./*.img
 
 debootstrap-clean:
-	rm -rf $(DEBOOTSTRAP_DIR)
+	rm -rf $(DEBOOTSTRAP)
 
 debootstrap-empty:
-	mkdir -p $(DEBOOTSTRAP_DIR)
+	mkdir -p $(DEBOOTSTRAP)
 
 debootstrap: debootstrap-clean debootstrap-empty
-	cp -r $(DEBOOTSTRAP_PARENT)/rootfs $(DEBOOTSTRAP_DIR)/rootfs
+	cp -r $(DEBOOTSTRAP_PARENT)/rootfs $(DEBOOTSTRAP)/rootfs
 
 debootstrap-sync:
 	# Bootstrap stage 1 ...
@@ -86,24 +87,24 @@ root: debootstrap
 	# Running setup and configuration ...
 
 	# Copy hard-float firmare into our rootfs
-	cp -r $(FIRMWARE_DIR)/hardfp/opt/* $(DEBOOTSTRAP_DIR)/rootfs/opt/
+	cp -r $(FIRMWARE)/hardfp/opt/* $(DEBOOTSTRAP)/rootfs/opt/
 
 	# Copy over pre-compiled modules for Raspberry Pi
-	cp -r $(FIRMWARE_DIR)/modules/* $(DEBOOTSTRAP_DIR)/rootfs/lib/modules/
-	
+	cp -r $(FIRMWARE)/modules/* $(DEBOOTSTRAP)/rootfs/lib/modules/
+
 	# Copy bitprinter specific assets
-	cp -r $(ASSETS_DIR)/* $(DEBOOTSTRAP_DIR)/
-	
+	cp -r $(ASSETS)/* $(DEBOOTSTRAP)/rootfs/
+
 	# Run bitprinter config script
-	cp ./config.sh $(DEBOOTSTRAP_DIR)/rootfs/root/
-	chroot $(DEBOOTSTRAP_DIR)/rootfs/ /root/config.sh
+	cp $(SCRIPT)/config.sh $(DEBOOTSTRAP)/rootfs/root/
+	chroot $(DEBOOTSTRAP)/rootfs/ /root/config.sh
 
 	# Clean up emulation binaries
-	rm $(DEBOOTSTRAP_DIR)/rootfs/usr/bin/qemu-arm-static
+	rm $(DEBOOTSTRAP)/rootfs/usr/bin/qemu-arm-static
 
 boot: debootstrap-empty
-	mkdir -p $(DEBOOTSTRAP_DIR)/bootfs
-	cp -r $(FIRMWARE_DIR)/boot/* $(DEBOOTSTRAP_DIR)/bootfs/
+	mkdir -p $(DEBOOTSTRAP)/bootfs
+	cp -r $(FIRMWARE)/boot/* $(DEBOOTSTRAP)/bootfs/
 
 empty-image:
 	# Create an empty image ...
@@ -111,23 +112,23 @@ empty-image:
 
 disk: empty-image
 	# Handle creation, partitioning, formatting and mounting a new disk
-	$(SCRIPT_DIR)/disk.sh $(IMAGE) $(MOUNT_DIR)
+	$(SCRIPT)/disk.sh $(IMAGE) $(MOUNT)
 
 image: root boot disk
 	# Copy the output of debootstrap into the image
-	cp -r $(DEBOOTSTRAP_DIR)/rootfs/* $(MOUNT_DIR)/
-	cp -r $(DEBOOTSTRAP_DIR)/bootfs/* $(MOUNT_DIR)/boot/
+	cp -r $(DEBOOTSTRAP)/rootfs/* $(MOUNT)/
+	cp -r $(DEBOOTSTRAP)/bootfs/* $(MOUNT)/boot/
 
 unmount:
 	# Unmount the image and remove temporary mount point
-	umount $(MOUNT_DIR)/boot
-	umount $(MOUNT_DIR)
+	umount $(MOUNT)/boot
+	umount $(MOUNT)
 
 	# Remove mount point
-	rm -rf $(MOUNT_DIR)
+	rm -rf $(MOUNT)
 
 dist:
-	$(SCRIPT_DIR)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) $(STAGING_DIR)
+	$(SCRIPT)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) .
 
 emulator:
 	# Launch an emulator with the latest release
@@ -139,4 +140,4 @@ emulator:
 	 -no-reboot \
 	 -serial stdio \
 	 -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
-	 -hda $(shell ls -st $(STAGING_DIR)/*.img | head -n 1 | cut -d ' ' -f 2)
+	 -hda $(shell ls -st ./*.img | head -n 1 | cut -d ' ' -f 2)

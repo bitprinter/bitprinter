@@ -23,8 +23,8 @@ Start by cloning this repository
 
     git clone https://github.com/bitprinter/bitprinter.git bitprinter
 
-Then launch the build environment and make an image. This can take up to several
-hours when running the first times since sever
+Then launch the build environment and make an image. Running this can take up to
+several hours and result in approximately 2.5 GB in downloads.
 
     cd bitprinter
     make init

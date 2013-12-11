@@ -123,7 +123,7 @@ root: debootstrap
 	cp -r $(FIRMWARE)/modules/* $(DEBOOTSTRAP)/rootfs/lib/modules/
 
 	# Copy bitprinter specific assets
-	cp -r $(ASSETS)/* $(DEBOOTSTRAP)/rootfs/
+	cp -r $(ASSETS)/rootfs/* $(DEBOOTSTRAP)/rootfs/
 
 	# Run bitprinter config script
 	cp $(SCRIPT)/config.sh $(DEBOOTSTRAP)/rootfs/root/
@@ -135,6 +135,9 @@ root: debootstrap
 boot: debootstrap-empty
 	mkdir -p $(DEBOOTSTRAP)/bootfs
 	cp -r $(FIRMWARE)/boot/* $(DEBOOTSTRAP)/bootfs/
+
+	# Copy bitprinter specific assets
+	cp -r $(ASSETS)/bootfs/* $(DEBOOTSTRAP)/bootfs/
 
 empty-image:
 	# Create an empty image ...

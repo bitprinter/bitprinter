@@ -90,15 +90,13 @@ find /var/cache -type f -exec rm -rf {} \;
 rm -rf /tmp/*
 
 # Now run zerofree
-init 1
-mount -o remount,ro /dev/sda1
-zerofree /dev/sda1
+echo "Killing unneeded processes ..."
+service rsyslog stop
+service network-manager stop
+killall dhclient
 
-echo "Done!"
-echo " "
-echo "++++++++++++++++++++++++++++++++++++++++"
-echo "Now run zerofree:"
-echo "> init 1"
-echo "> mount -o remount,ro /dev/sda1"
-echo "> zerofree /dev/sda1"
-echo "++++++++++++++++++++++++++++++++++++++++"
+echo "Remounting read-only ..."
+mount -o remount,ro /dev/sda1
+
+echo "Writing zeros to free space to improve compression ..."
+zerofree /dev/sda1

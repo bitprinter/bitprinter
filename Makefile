@@ -32,6 +32,7 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 # Depends: qemu, qemu-user, qemu-user-static, binfmt-support, kpartx, debootstrap
 
 FIRMWARE_REPO="https://github.com/bitprinter/firmware.git"
+BOX=./basebox.json
 
 # Referenced directories
 FIRMWARE=./lib/firmware
@@ -53,10 +54,13 @@ IMAGE=$(BUILD)/$(IMAGE_NAME).$(IMAGE_EXT)
 git-firmware:
 	if [ ! -d $(FIRMWARE) ] ; then git clone $(FIRMWARE_REPO) $(FIRMWARE) ; fi ;
 
+box:
+	packer build $(BOX)
+
+init: git-firmware box
+
 vagrant-up:
 	vagrant up
-
-init: git-firmware vagrant-up
 
 build:
 	vagrant ssh -c "cd /vagrant ; sudo make all"

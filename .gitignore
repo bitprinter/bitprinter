@@ -2,8 +2,9 @@
 *.swp
 *.swo
 
-# Vagrant helper dir
+# Vagrant & Packer helper dir
 .vagrant
+packer_cache
 
 # Third-party deps (not version-controlled)
 lib/package.box

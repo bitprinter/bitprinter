@@ -60,6 +60,10 @@ apt-get -y install build-essential module-assistant
 m-a prepare
 apt-get -y install openssh-server zerofree sudo
 
+# Install bitprinter build dependencies
+apt-get -y install qemu qemu-user qemu-user-static binfmt-support
+apt-get -y install dosfstools e2fsprogs kpartx debootstrap
+
 # Set up SSH with default insecure vagrant key
 mkdir -p /home/vagrant/.ssh
 cd /home/vagrant/.ssh

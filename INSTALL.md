@@ -11,9 +11,10 @@ you will need
 -------------
 
 * At least 10 GB of disk space (5 might work)
-* VirtualBox
-* Vagrant
-* git
+* [VirtualBox](https://www.virtualbox.org/wiki/Downloads)
+* [Packer](http://www.packer.io/downloads.html)
+* [Vagrant](http://www.vagrantup.com/downloads.html)
+* [git](http://git-scm.com/downloads)
 * (optional) QEMU
 
 

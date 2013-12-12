@@ -57,10 +57,10 @@ IMAGE=$(BUILD)/$(IMAGE_NAME).$(IMAGE_EXT)
 
 # Host make targets
 git-firmware:
-	@if [ ! -d $(FIRMWARE) ] ; then git clone $(FIRMWARE_REPO) $(FIRMWARE) ; fi ;
+	if [ ! -d $(FIRMWARE) ] ; then git clone $(FIRMWARE_REPO) $(FIRMWARE) ; fi ;
 
 box:
-	@if [ ! -f $(BOX) ] ; then \
+	if [ ! -f $(BOX) ] ; then \
 		cd base ; packer build --force ./box.json ; cd .. ; \
 		mv $(PACKER_OUT) $(BOX) ; \
 	else \

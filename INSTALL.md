@@ -28,7 +28,7 @@ Then launch the build environment and make an image. Running this can take up to
 several hours and result in approximately 2.5 GB in downloads.
 
     cd bitprinter
-    make init
+    make lib
     make build
 
 If you have QEMU installed on your host machine, you can test the latest image:

@@ -56,7 +56,7 @@ IMAGE=$(BUILD)/$(IMAGE_NAME).$(IMAGE_EXT)
 
 # Host make targets
 git-firmware:
-	if [ ! -d $(FIRMWARE) ] ; then git clone $(FIRMWARE_REPO) $(FIRMWARE) ; fi ;
+	@if [ ! -d $(FIRMWARE) ] ; then git clone $(FIRMWARE_REPO) $(FIRMWARE) ; fi ;
 
 box:
 	@if [ ! -f $(BOX) ] ; then \
@@ -69,10 +69,10 @@ box:
 
 lib: git-firmware box
 
-vagrant-up:
+vagrant-up: lib
 	vagrant up
 
-build:
+build: vagrant-up
 	vagrant ssh -c "cd /vagrant ; sudo make all"
 
 emulator:

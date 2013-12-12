@@ -44,7 +44,7 @@ the hard way
 
 If you've come this far, then chances are you want to customize the OS that is
 produced so you can make your Raspberry Pi do something new. All customization
-should be put into rpi/script/config.sh. This gets run after the second-stage
+should be put into rpi/provision.sh. This gets run after the second-stage
 bootstrap and while we are still able to chroot into an emulated environment.
 This is where we set a root password, set our hostname, apply other
 configuration, install needed packages and remove those that are not needed.

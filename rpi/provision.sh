@@ -1,5 +1,11 @@
-#!/bin/bash
+# Example configuration file - Copy this to config.sh and make any desired changes there.
 
-# Run debootstrap-sync so we have a fresh copy to work with
-cd /vagrant
-sudo make debootstrap-sync
+# Set root password
+echo "root:bitprinter" | chpasswd
+
+# Set hostname
+echo "bitprinter" > /etc/hostname
+
+# Create default user
+useradd -m -G sudo -s /bin/bash bitprinter
+echo "bitprinter:bitprinter" | chpasswd

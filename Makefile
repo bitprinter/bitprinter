@@ -41,8 +41,9 @@ BOX=./lib/package.box
 
 # Referenced directories
 FIRMWARE=./lib/firmware
-SCRIPT=./rpi/script
-ASSETS=./rpi/assets
+SCRIPTS=./env/scripts
+RPI=./rpi
+RPI_ASSETS=$(RPI)/assets
 
 # Build Directories
 DEBOOTSTRAP_PARENT=/tmp/debootstrap
@@ -142,10 +143,10 @@ root: debootstrap
 	cp -r $(FIRMWARE)/modules/* $(DEBOOTSTRAP)/rootfs/lib/modules/
 
 	# Copy bitprinter specific assets
-	cp -r $(ASSETS)/rootfs/* $(DEBOOTSTRAP)/rootfs/
+	cp -r $(RPI_ASSETS)/rootfs/* $(DEBOOTSTRAP)/rootfs/
 
 	# Run bitprinter config script
-	cp $(SCRIPT)/config.sh $(DEBOOTSTRAP)/rootfs/root/
+	cp $(RPI)/provision.sh $(DEBOOTSTRAP)/rootfs/root/
 	chroot $(DEBOOTSTRAP)/rootfs/ /root/config.sh
 
 	# Clean up emulation binaries
@@ -156,7 +157,7 @@ boot: debootstrap-empty
 	cp -r $(FIRMWARE)/boot/* $(DEBOOTSTRAP)/bootfs/
 
 	# Copy bitprinter specific assets
-	cp -r $(ASSETS)/bootfs/* $(DEBOOTSTRAP)/bootfs/
+	cp -r $(RPI_ASSETS)/bootfs/* $(DEBOOTSTRAP)/bootfs/
 
 empty-image:
 	# Create an empty image ...
@@ -164,7 +165,7 @@ empty-image:
 
 disk: empty-image
 	# Handle creation, partitioning, formatting and mounting a new disk
-	$(SCRIPT)/disk.sh $(IMAGE) $(MOUNT)
+	$(SCRIPTS)/disk.sh $(IMAGE) $(MOUNT)
 
 image: root boot disk
 	# Copy the output of debootstrap into the image
@@ -180,4 +181,4 @@ unmount:
 	rm -rf $(MOUNT)
 
 dist:
-	$(SCRIPT)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) .
+	$(SCRIPTS)/release.sh $(IMAGE) $(MAJOR_V).$(MINOR_V) .

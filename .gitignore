@@ -4,7 +4,7 @@
 
 # Vagrant & Packer helper dir
 .vagrant
-packer_cache
+base/packer*
 
 # Third-party deps (not version-controlled)
 lib/package.box

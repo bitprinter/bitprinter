@@ -22,7 +22,7 @@
         "disk_size": 40960,
         "guest_additions_path": "VBoxGuestAdditions_{{.Version}}.iso",
         "guest_os_type": "Debian",
-        "http_directory": "src/packer/www",
+        "http_directory": "./http",
         "iso_checksum": "564282a81b5aef7015501e497fc63d81",
         "iso_checksum_type": "md5",
         "iso_url": "http://cdimage.debian.org/debian-cd/7.2.0/i386/iso-cd/debian-7.2.0-i386-netinst.iso",
@@ -41,7 +41,7 @@
     }],
     "provisioners": [{
         "type": "shell",
-        "script": "src/packer/provision.sh"
+        "script": "./provision.sh"
     }],
     "post-processors": [{
         "type": "vagrant",

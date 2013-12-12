@@ -34,14 +34,15 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 
 # Assets for ./lib
 FIRMWARE_REPO="https://github.com/bitprinter/firmware.git"
-BOX_CONF=./box.json
+
+# Packer
+PACKER_OUT=./base/packer_virtualbox_virtualbox.box
 BOX=./lib/package.box
-PACKER_OUT=packer-debian-7.2.0-i386
 
 # Referenced directories
 FIRMWARE=./lib/firmware
-SCRIPT=./src/script
-ASSETS=./assets
+SCRIPT=./rpi/script
+ASSETS=./rpi/assets
 
 # Build Directories
 DEBOOTSTRAP_PARENT=/tmp/debootstrap
@@ -60,8 +61,8 @@ git-firmware:
 
 box:
 	@if [ ! -f $(BOX) ] ; then \
-		packer build --force $(BOX_CONF) ; \
-		mv $(PACKER_OUT)/*.box $(BOX) ; \
+		cd base ; packer build --force ./box.json ; cd .. ; \
+		mv $(PACKER_OUT) $(BOX) ; \
 	else \
 		echo "Box already made..." ; \
 		echo "Run make box-clean before rebuilding" ; \

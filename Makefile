@@ -91,7 +91,7 @@ emulator:
 
 box-clean:
 	rm -rf $(BOX)
-	rm -rf ./packer_cache
+	rm -rf ./base/packer_cache
 
 dist-clean:
 	rm -rf ./*.img

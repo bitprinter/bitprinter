@@ -90,9 +90,10 @@ find /var/cache -type f -exec rm -rf {} \;
 rm -rf /tmp/*
 
 # Now run zerofree
-# $ init 1
-# $ mount -o remount,ro /dev/sda1
-# $ zerofree /dev/sda1
+init 1
+mount -o remount,ro /dev/sda1
+zerofree /dev/sda1
+
 echo "Done!"
 echo " "
 echo "++++++++++++++++++++++++++++++++++++++++"

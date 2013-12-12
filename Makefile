@@ -19,9 +19,10 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 # use copies lib/debootstrap.
 #
 # Host Targets:
-#  init -- Helper to get firmware and create build server
+#  lib -- Helper to get firmware and create build server
 #  build -- SSH into Vagrant box and run `make all`
 #  emulator -- Launch QEMU with the most recent image
+#  dist-clean -- Remove built images
 #
 # Guest Targets:
 #  clean -- Clear out build directory
@@ -31,8 +32,11 @@ DEB_MIRROR="http://archive.raspbian.org/raspbian/"
 #
 # Depends: qemu, qemu-user, qemu-user-static, binfmt-support, kpartx, debootstrap
 
+# Assets for ./lib
 FIRMWARE_REPO="https://github.com/bitprinter/firmware.git"
-BOX=./basebox.json
+BOX_CONF=./box.json
+BOX=./lib/package.box
+PACKER_OUT=packer-debian-7.2.0-i386
 
 # Referenced directories
 FIRMWARE=./lib/firmware
@@ -55,9 +59,15 @@ git-firmware:
 	if [ ! -d $(FIRMWARE) ] ; then git clone $(FIRMWARE_REPO) $(FIRMWARE) ; fi ;
 
 box:
-	packer build $(BOX)
+	@if [ ! -f $(BOX) ] ; then \
+		packer build --force $(BOX_CONF) ; \
+		mv $(PACKER_OUT)/*.box $(BOX) ; \
+	else \
+		echo "Box already made..." ; \
+		echo "Run make box-clean before rebuilding" ; \
+	fi ;
 
-init: git-firmware box
+lib: git-firmware box
 
 vagrant-up:
 	vagrant up
@@ -77,6 +87,13 @@ emulator:
 	 -append "root=/dev/sda2 panic=1 rootfstype=ext4 rw" \
 	 -hda $(shell ls -st ./*.img | head -n 1 | cut -d ' ' -f 2)
 
+box-clean:
+	rm -rf $(BOX)
+	rm -rf ./packer_cache
+
+dist-clean:
+	rm -rf ./*.img
+
 # Guest make targets
 all: root boot image unmount dist
 
@@ -86,9 +103,6 @@ delete-map:
 
 clean: delete-map debootstrap-clean
 	rm -rf $(BUILD)/*
-
-dist-clean:
-	rm -rf ./*.img
 
 debootstrap-clean:
 	rm -rf $(DEBOOTSTRAP)
